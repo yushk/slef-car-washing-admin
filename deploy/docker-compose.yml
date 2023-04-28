@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  # proxy 为服务名称，可自行改变
+  proxy:
+    image: nginx:alpine
+    container_name: proxy
+    # restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./conf.d:/etc/nginx/conf.d
+      - ./cert:/etc/nginx/cert
+      - ./html:/etc/nginx/html
+  app1:
+    image: registry.cn-beijing.aliyuncs.com/yushk/sport_web:latest
+    container_name: sport_web
+  app2:
+    image: registry.cn-beijing.aliyuncs.com/yushk/sport_apiserver:latest
+    container_name: sport_apiserver
+    restart: always
+    environment:
+      SPORT_MANAGER_PROTOCOL: tcp
+      SPORT_MANAGER_HOST: sport-manager
+      SPORT_MANAGER_PORT: 30031
+  app3:
+    image: registry.cn-beijing.aliyuncs.com/yushk/sport_manager:latest
+    container_name: sport_manager
+    hostname: sport-manager
+    restart: always
+    environment:
+      SPORT_MANAGER_PROTOCOL: tcp
+      SPORT_MANAGER_HOST: 0.0.0.0
+      SPORT_MANAGER_PORT: 30031
+      SPORT_DB_TYPE: mongodb
+      SPORT_DB_ADDRESS: mongodb://root:kaisawind@sport-mongodb:27017
+
+  app4:
+    image: registry.cn-beijing.aliyuncs.com/yushk/club_web:latest
+    container_name: club_web
+  app5:
+    image: registry.cn-beijing.aliyuncs.com/yushk/club_apiserver:latest
+    container_name: club_apiserver
+    restart: always
+    environment:
+      SPORT_MANAGER_PROTOCOL: tcp
+      SPORT_MANAGER_HOST: club-manager
+      SPORT_MANAGER_PORT: 30031
+  app6:
+    image: registry.cn-beijing.aliyuncs.com/yushk/club_manager:latest
+    container_name: club_manager
+    hostname: club-manager
+    restart: always
+    environment:
+      SPORT_MANAGER_PROTOCOL: tcp
+      SPORT_MANAGER_HOST: 0.0.0.0
+      SPORT_MANAGER_PORT: 30031
+      SPORT_DB_TYPE: mongodb
+      SPORT_DB_ADDRESS: mongodb://root:kaisawind@sport-mongodb:27017
+
+  mongodb:
+    image: mongo:4.4
+    hostname: sport-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb:/data/db:rw
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: kaisawind
+volumes:
+  mongodb:
