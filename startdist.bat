@@ -1,0 +1,1 @@
+http-server --port=7002 .\dist\

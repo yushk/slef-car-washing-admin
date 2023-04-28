@@ -1,0 +1,1 @@
+ssh root@47.98.59.56  'cd /root/project/deploy && ./deploy.sh'
